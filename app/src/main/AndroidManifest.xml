@@ -25,7 +25,8 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/API_KEY_GOOGLE_MAPS" />
-
     </application>
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 </manifest>
