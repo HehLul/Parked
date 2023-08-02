@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Parked</string>
+
+    <string name="API_KEY_GOOGLE_MAPS">AIzaSyAQ9M1lAVNm30g-6H2n9_fRMhDAuaG3E9E</string>
 </resources>
