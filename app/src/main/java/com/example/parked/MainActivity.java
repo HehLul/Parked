@@ -38,19 +38,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //FIELDS----------------------------------------------------------------------------------------------
     private GoogleMap map;
     private Button btnSetParked;
-//PLACES VARIABLES
-    private Places Places;
-    private PlacesClient placesClient;
-    private FusedLocationProviderClient fusedLocationProviderClient;
-    private LocationServices LocationServices;
-    private ContextCompat ContextCompat;
-    private PackageManager PackageManager;
-    private ActivityCompat ActivityCompat;
+
+
+//LOCATION VARS
     private boolean locationPermissionGranted;
     private int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
-    private Location lastKnownLocation;
-    private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
-    private static final int DEFAULT_ZOOM = 15;
+
 //ONCREATE----------------------------------------------------------------------------------------------
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,14 +58,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void init(){
         SupportMapFragment map = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         map.getMapAsync(this);
-
-        // Construct a PlacesClient
-
-        Places.initialize(getApplicationContext(), getString(R.string.API_KEY_GOOGLE_MAPS));
-        placesClient = Places.createClient(this);
-
-        // Construct a FusedLocationProviderClient.
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         btnSetParked = findViewById(R.id.btnSetParked);
     }
