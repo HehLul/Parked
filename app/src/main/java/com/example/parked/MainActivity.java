@@ -26,6 +26,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -55,9 +56,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
-      //  getLocationPermission();
         setParked();
-        //updateMap();
     }
 //INITIALIZATION METHOD----------------------------------------------------------------------------------------------
     public void init(){
@@ -104,17 +103,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 //PERMISSION METHODS----------------------------------------------------------------------------------------------
-//    private void getLocationPermission() {
-//        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-//                android.Manifest.permission.ACCESS_FINE_LOCATION)
-//                == PackageManager.PERMISSION_GRANTED) {
-//            locationPermissionGranted = true;
-//        } else {
-//            ActivityCompat.requestPermissions(this,
-//                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-//                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-//        }
-//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -143,8 +131,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void updateLocationUI() {
+        UiSettings uiSettings = mMap.getUiSettings();
+        uiSettings.setZoomGesturesEnabled(true);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
+            // Assuming you have a GoogleMap instance called 'mMap'
+
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
         } else {
@@ -168,12 +160,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 
                             // Move the camera to the user's current location
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+                            //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 20));
                         }
                     });
         }
     }
-
 
 
 //UNUSED----------------------------------------------------------------------------------------------
