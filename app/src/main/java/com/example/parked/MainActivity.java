@@ -99,6 +99,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View v) {
                 Log.d("MainActivity", "Hello");
+
+
+
             }
         });
     }
