@@ -1,14 +1,17 @@
 package com.example.parked;
 
 import static android.content.ContentValues.TAG;
-
+import android.Manifest;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -36,11 +39,13 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
 //FIELDS----------------------------------------------------------------------------------------------
-    private GoogleMap map;
+    private GoogleMap mMap;
     private Button btnSetParked;
 
 
 //LOCATION VARS
+    private LocationManager locationManager;
+    private LocationListener locationListener;
     private boolean locationPermissionGranted;
     private int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 
@@ -50,17 +55,45 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
-        getLocationPermission();
+      //  getLocationPermission();
         setParked();
         //updateMap();
     }
 //INITIALIZATION METHOD----------------------------------------------------------------------------------------------
     public void init(){
-        SupportMapFragment map = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        map.getMapAsync(this);
+        SupportMapFragment mMap = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mMap.getMapAsync(this);
 
         btnSetParked = findViewById(R.id.btnSetParked);
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);//init location
+        locationListenerInit();
     }
+
+    private  void locationListenerInit (){
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                // Update map with new location
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                mMap.addMarker(new MarkerOptions().position(latLng).title("Current Location"));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+            }
+            // Other LocationListener methods...
+        };
+
+        // Request location updates
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    0, 0, locationListener);
+        } else {
+            // Request permission
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+    }
+
 //BUTTON METHODS----------------------------------------------------------------------------------------------
     public void setParked(){
         btnSetParked.setOnClickListener(new View.OnClickListener() {
@@ -71,31 +104,77 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 //PERMISSION METHODS----------------------------------------------------------------------------------------------
-    private void getLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            locationPermissionGranted = true;
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+//    private void getLocationPermission() {
+//        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+//                android.Manifest.permission.ACCESS_FINE_LOCATION)
+//                == PackageManager.PERMISSION_GRANTED) {
+//            locationPermissionGranted = true;
+//        } else {
+//            ActivityCompat.requestPermissions(this,
+//                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+//                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+//        }
+//    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults); // Call super method, get rid of error
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, request location updates
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                            0, 0, locationListener);
+                }
+            } else {
+                // Permission denied, handle accordingly
+            }
         }
     }
 
 //MAP METHODS----------------------------------------------------------------------------------------------
-    @Override
+    @Override//MUST be last method
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        googleMap.addMarker(new MarkerOptions()
-                .position(new LatLng(0, 0))
-                .title("Marker"));
-
-        // Turn on the My Location layer and the related control on the map.
-//        updateLocationUI();
-
-       // Get the current location of the device and set the position of the map.
-//        getDeviceLocation();
+        mMap = googleMap;
+        updateLocationUI();
+        getDeviceLocation();
     }
+
+    private void updateLocationUI() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        } else {
+            // Request permission
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+    }
+
+    private void getDeviceLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            // Get the best and most recent location of the device
+            FusedLocationProviderClient fusedLocationProviderClient =
+                    LocationServices.getFusedLocationProviderClient(this);
+
+            fusedLocationProviderClient.getLastLocation().addOnCompleteListener(
+                    task -> {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            Location location = task.getResult();
+                            LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+                            // Move the camera to the user's current location
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+                        }
+                    });
+        }
+    }
+
+
 
 //UNUSED----------------------------------------------------------------------------------------------
     @Override
