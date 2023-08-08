@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationListener locationListener;
     private boolean locationPermissionGranted;
     private int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
+    private double[] cords = new double[2];
 
 //ONCREATE----------------------------------------------------------------------------------------------
     @Override
@@ -98,9 +99,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         btnSetParked.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("MainActivity", "Hello");
+                //save current location
+                //place a parked marker on saved location
+                //change button state2
 
-
+                Log.d(TAG, ""+cords[0]+", "+cords[1]);
 
             }
         });
@@ -160,13 +163,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     task -> {
                         if (task.isSuccessful() && task.getResult() != null) {
                             Location location = task.getResult();
-                            LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            cords[0] = location.getLatitude();
+                            cords[1] =  location.getLongitude();
+                           // Log.d(TAG, ""+cords[0]+", "+cords[1]);
+
+                            LatLng currentLatLng = new LatLng(cords[0], cords[1]);
 
                             // Move the camera to the user's current location
                             //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 20));
                         }
                     });
         }
+
     }
 
 
