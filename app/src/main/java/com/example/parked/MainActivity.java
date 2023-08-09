@@ -58,15 +58,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
         init();
         setParked();
-
     }
 //INITIALIZATION METHOD----------------------------------------------------------------------------------------------
     public void init(){
         SupportMapFragment mMap = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMap.getMapAsync(this);
-        parked = false;
+
 
         btnSetParked = findViewById(R.id.btnSetParked);
+        parked = false;
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);//init location
         locationListenerInit();
@@ -97,31 +97,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 //BUTTON METHODS----------------------------------------------------------------------------------------------
-    public void setParked(){
+    public void setParked() {
         btnSetParked.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //save current location
-                //place a parked marker on saved location
-                //change button state2
+                if (!parked) {
+                    // Save current location
+                    parkedCords = cords;
+                    LatLng parkedLocation = new LatLng(parkedCords[0], parkedCords[1]);
+                    mMap.addCircle(new CircleOptions()
+                            .center(parkedLocation)
+                            .radius(100).fillColor(Color.BLUE)
+                            .strokeColor(Color.DKGRAY));
+                    Log.d(TAG, "" + parkedCords[0] + ", " + parkedCords[1]);
 
-                parked = true;
-                parkedCords = cords;
-                LatLng parkedLocation = new LatLng(parkedCords[0], parkedCords[1]);
-               // mMap.addMarker(new MarkerOptions().position(parkedLocation).title("Parked"));
-                mMap.addCircle(new CircleOptions()
-                        .center(parkedLocation)
-                        .radius(100).fillColor(Color.BLUE)
-                        .strokeColor(Color.DKGRAY));
-                Log.d(TAG, ""+parkedCords[0]+", "+parkedCords[1]);
-                btnSetParked.setText("FIND VEHICLE");
+                    // Update button text and flag
+                    btnSetParked.setText("FIND VEHICLE");
+                    parked = true;
+                } else {
+                    // Handle finding the vehicle
+                    // Implement logic to display route to parked location
+                    route();
+                    // Update button text and flag
+                    btnSetParked.setText("PARK");
+                    parked = false;
+                }
             }
         });
     }
 
+    private void route(){
 
-    private void reroute(){
     }
+
 //PERMISSION METHODS----------------------------------------------------------------------------------------------
 
     @Override
