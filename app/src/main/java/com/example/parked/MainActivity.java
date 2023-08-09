@@ -2,6 +2,8 @@ package com.example.parked;
 
 import static android.content.ContentValues.TAG;
 import android.Manifest;
+
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -9,16 +11,17 @@ import androidx.core.content.ContextCompat;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
-import android.webkit.PermissionRequest;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -27,21 +30,17 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.net.PlacesClient;
-
-import java.security.KeyPairGenerator;
-import java.security.Permission;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
 //FIELDS----------------------------------------------------------------------------------------------
     private GoogleMap mMap;
     private Button btnSetParked;
+    private Boolean parked;
 
 
 //LOCATION VARS
@@ -50,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean locationPermissionGranted;
     private int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
     private double[] cords = new double[2];
+    private double[] parkedCords = new double[2];
 
 //ONCREATE----------------------------------------------------------------------------------------------
     @Override
@@ -58,11 +58,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
         init();
         setParked();
+
     }
 //INITIALIZATION METHOD----------------------------------------------------------------------------------------------
     public void init(){
         SupportMapFragment mMap = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMap.getMapAsync(this);
+        parked = false;
 
         btnSetParked = findViewById(R.id.btnSetParked);
 
@@ -103,10 +105,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //place a parked marker on saved location
                 //change button state2
 
-                Log.d(TAG, ""+cords[0]+", "+cords[1]);
-
+                parked = true;
+                parkedCords = cords;
+                LatLng parkedLocation = new LatLng(parkedCords[0], parkedCords[1]);
+               // mMap.addMarker(new MarkerOptions().position(parkedLocation).title("Parked"));
+                mMap.addCircle(new CircleOptions()
+                        .center(parkedLocation)
+                        .radius(100).fillColor(Color.BLUE)
+                        .strokeColor(Color.DKGRAY));
+                Log.d(TAG, ""+parkedCords[0]+", "+parkedCords[1]);
+                btnSetParked.setText("FIND VEHICLE");
             }
         });
+    }
+
+
+    private void reroute(){
     }
 //PERMISSION METHODS----------------------------------------------------------------------------------------------
 
@@ -138,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void updateLocationUI() {
         UiSettings uiSettings = mMap.getUiSettings();
-        uiSettings.setZoomGesturesEnabled(true);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             // Assuming you have a GoogleMap instance called 'mMap'
@@ -179,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 //UNUSED----------------------------------------------------------------------------------------------
+
     @Override
     public void onClick(View v) {
     }
